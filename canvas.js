@@ -1,3 +1,4 @@
+// Hei Vegard
 var squaresize = 20;
 
 // Movement variables
