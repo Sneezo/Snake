@@ -225,3 +225,18 @@ document.addEventListener('keydown',function(event) {
 		f();
 	}
 })
+
+
+
+//Bullet shooting part of the game, not yet to be implemented
+/*
+
+
+
+
+
+
+
+
+
+*/
