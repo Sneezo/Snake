@@ -1,5 +1,12 @@
-// Hei Vegard
+// Canvas variables
+var c = document.getElementById("canvas"); // Canvas
+var canvasHeight = 600, canvasWidth = 600; // hard coded in the html
+var ctx = c.getContext("2d");
+
 var squaresize = 20;
+var gameSpeed = 1000/10;
+var xTiles = canvasWidth/squaresize;
+var yTiles = canvasHeight/squaresize;
 
 // Movement variables
 var dif = squaresize; // Stepsize
@@ -8,22 +15,42 @@ var dir = "down"; // Initial direction
 // Game loop element
 var t;
 
-// Canvas variables
-var c = document.getElementById("canvas"); // Canvas
-var canvasHeight = 600, canvasWidth = 600;
-var ctx = c.getContext("2d");
-
-
 var isPlaying = false;
+var dead = false;
+
+randomizePosition = function(object) {
+	object.x = Math.floor(Math.random()*(xTiles-1))*squaresize;
+	object.y = Math.floor(Math.random()*(yTiles-1))*squaresize;
+}
 
 var head = new Head();
+randomizePosition(head);
+
+fruit = new Object();
+fruit.move = randomizePosition;
+fruit.width = squaresize;
+fruit.height = squaresize;
+fruit.draw = function drawFruit() {
+	ctx.fillStyle = "#FF0000";
+	ctx.fillRect(fruit.x, fruit.y, fruit.height, fruit.width);
+}
+fruit.move(fruit);
 
 function Head() {
-	this.x = Math.floor(Math.random()*580);
-	this.y = Math.floor(Math.random()*600);
 	this.width = squaresize;
 	this.height = squaresize;
 	this.child = null;
+	this.shouldAddChild = false;
+
+	this.ateItself = function() {
+		if(this.child) {
+			if(this.child.collides(this.x, this.y)) {
+				// Snake ate itself, end game
+				return true;
+			}
+		}
+		return false;
+	}
 
 	this.update = function() {
 		var prev_x = this.x,
@@ -75,6 +102,15 @@ function Child(parent) {
 	this.height = parent.height;
 	this.child = null;
 
+	this.collides = function(x, y) {
+		if(this.x === x && this.y === y) {
+			return true;
+		} else if(this.child) {
+			return this.child.collides(x,y);
+		}
+		return false;
+	}
+
 	this.update = function(x, y) {
 		var prev_x = this.x,
 			prev_y = this.y;
@@ -104,25 +140,10 @@ function Child(parent) {
 }
 
 
-
-
-fruit = new Object();
-fruit.x = Math.floor(Math.random()*550);
-fruit.y = Math.floor(Math.random()*550);
-fruit.width = squaresize;
-fruit.height = squaresize;
-fruit.draw = function drawFruit() {
-	ctx.fillStyle = "#FF0000";
-	ctx.fillRect(fruit.x, fruit.y, fruit.height, fruit.width);
-}
-
 function eatFruit() {
-	if(head.x + head.width >= fruit.x && head.x <= fruit.x + fruit.width) {
-		if(head.y + head.height >= fruit.y && head.y < fruit.y + fruit.height) {
-			fruit.x = Math.floor(Math.random()*550);
-			fruit.y = Math.floor(Math.random()*550);
-			head.addChild();
-		}
+	if(head.x === fruit.x && head.y === fruit.y) {
+		fruit.move(fruit);
+		head.shouldAddChild = true;
 	}
 }
 
@@ -133,7 +154,16 @@ function update() {
 }
 
 function updatePositions() {
-	head.update();
+	if(head.ateItself()) {
+		dead = true;
+		stopPlaying();
+		console.log("OH YOU DEAD!");
+		return;
+	} else if (head.shouldAddChild) {
+		head.addChild();
+		head.shouldAddChild = false;
+	}
+		head.update();	
 }
 
 function redraw() {
@@ -141,10 +171,22 @@ function redraw() {
 	fruit.draw();
 	head.draw();
 }
+function stopPlaying() {
+	console.log("stopping play");
+	clearInterval(t);
+	isPlaying = false;
+}
+function startPlaying() {
+	console.log("starting play");
+	t = setInterval("update()", gameSpeed);
+	isPlaying = true;
+}
 
 
 // Create a new key/hash table
 var command = {};
+command[80]  = togglePlay; // p key
+command[13]  = togglePlay; // Enter key
 command[37] = function () { // Left key
 	if(dir != "right")
 		dir = "left";
@@ -160,24 +202,26 @@ command[39] = function () { // Right key
 command[40] = function () { // Down key
 	if(dir != "up")
 		dir = "down";
-}; 
-command[80]  = function () { // p key
-	if(isPlaying){
-		clearInterval(t);
-	} else {
-		t = setInterval("update()", 1000/10);
-	}
-	isPlaying = !isPlaying;
-};
-command[13]  = function () { // Enter key
-	if(isPlaying){
-		clearInterval(t);
-	} else {
-		t = setInterval("update()", 1000/10);
-	}
-	isPlaying = !isPlaying;
 };
 
+
+function togglePlay() {
+	console.log("toggling");
+	if(isPlaying){
+		stopPlaying();
+	} else {
+		startPlaying();
+	}
+}
+
+
+ 
+
+
 document.addEventListener('keydown',function(event) {
-	command[event.keyCode]();
+	console.log('YOU PRESSED: ' + event.keyCode);
+	var f = command[event.keyCode];
+	if (typeof(f) == 'function') {
+		f();
+	}
 })
