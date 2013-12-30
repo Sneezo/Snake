@@ -150,6 +150,7 @@ function eatFruit() {
 function update() {
 	updatePositions();
 	eatFruit();
+	moveBullet();
 	redraw();
 }
 
@@ -203,6 +204,7 @@ command[40] = function () { // Down key
 	if(dir != "up")
 		dir = "down";
 };
+command[32] = head.shoot;
 
 
 function togglePlay() {
@@ -229,14 +231,39 @@ document.addEventListener('keydown',function(event) {
 
 
 //Bullet shooting part of the game, not yet to be implemented
-/*
+
+var bullet = new Bullet();
+
+head.shoot = function () {
+	bullet.drawBullet();
+}
+
+function Bullet() {
+	this.x = head.x;
+	this.y = head.y;
+	this.width = squaresize/2;
+	this.height = squaresize/2;
+
+	this.drawBullet = function () {
+		ctx.fillStyle = "#FF1500";
+		ctx.fillRect(this.x, this.y, this.width, this.height);
+	}
+}
+
+function moveBullet () {
+	if(dir=="right") {
+		bullet.x = bullet.x + 2*squaresize;
+	} else if (dir=="left") {
+		bullet.x = bullet.x - 2*squaresize;
+	} else if (dir=="up") {
+		bullet.y = bullet.y - 2*squaresize;
+	} else if (dir=="down") {
+		bullet.y = bullet.y + 2*squaresize;
+	}
+}
 
 
 
 
 
 
-
-
-
-*/
