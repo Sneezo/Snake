@@ -16,6 +16,7 @@ var t;
 
 var isPlaying = false;
 var dead = false;
+var hasMoved = false;
 
 randomizePosition = function(object) {
 	object.x = Math.floor(Math.random()*(xTiles-1))*squaresize;
@@ -153,8 +154,14 @@ function eatFruit() {
 function update() {
 	updatePositions();
 	eatFruit();
-	moveBullet();
+	if(bullet !=  null) {
+		bulletBorderCheck();
+	}
+	if(bullet != null) {
+		bullet.move();	
+	}
 	redraw();
+	hasMoved = false;
 }
 
 function updatePositions() {
@@ -176,7 +183,7 @@ function redraw() {
 	ctx.clearRect(0,0,620,620);
 	fruit.draw();
 	head.draw();
-	if (bullet) {
+	if (bullet != null) {
 		bullet.draw();	
 	}
 }
@@ -206,20 +213,24 @@ var command = {};
 command[80]  = togglePlay; // p key
 command[13]  = togglePlay; // Enter key
 command[37] = function () { // Left key
-	if(head.dir != "right")
+	if(head.dir != "right" && hasMoved==false)
 		head.dir = "left";
+		hasMoved = true;
 }; 
 command[38] = function () { // Up key
-	if(head.dir !="down")
+	if(head.dir !="down" && hasMoved==false)
 		head.dir = "up";
+		hasMoved = true;
 }; 
 command[39] = function () { // Right key
-	if(head.dir != "left")
+	if(head.dir != "left" && hasMoved==false)
 		head.dir = "right";
+		hasMoved = true;
 }; 
 command[40] = function () { // Down key
-	if(head.dir != "up")
+	if(head.dir != "up" && hasMoved==false)
 		head.dir = "down";
+		hasMoved = true;
 };
 command[32] = function () {
 	console.log("pressed space");
@@ -268,7 +279,7 @@ function Bullet() {
 
 	this.draw = function () {
 		console.log("drawing bullet");
-		ctx.fillStyle = "#FF1500";
+		ctx.fillStyle = "#000000";
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 	}
 	this.move = function () {

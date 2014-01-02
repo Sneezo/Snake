@@ -1,0 +1,66 @@
+//Bullet shooting part of the game, not yet to be implemented
+
+var bullet;
+
+head.shoot = function () {
+	console.log("shooting");
+	bullet = new Bullet();
+}
+
+function Bullet() {
+	this.x = head.x;
+	this.y = head.y;
+	this.dir = head.dir;
+	this.width = squaresize/2;
+	this.height = squaresize/2;
+
+	this.draw = function () {
+		console.log("drawing bullet");
+		ctx.fillStyle = "#0066FF";
+		ctx.fillRect(this.x, this.y, this.width, this.height);
+	}
+	this.move = function () {
+		if(bullet.dir=="right") {
+			bullet.x = bullet.x + 2*squaresize;
+		} else if (bullet.dir=="left") {
+			bullet.x = bullet.x - 2*squaresize;
+		} else if (bullet.dir=="up") {
+			bullet.y = bullet.y - 2*squaresize;
+		} else if (bullet.dir=="down") {
+			bullet.y = bullet.y + 2*squaresize;
+		}
+	}
+}
+
+
+function bulletBorderCheck() {
+	if (bullet.x < 0 || bullet.x > canvasWidth - squaresize) {
+		bullet = null;
+	} else if (bullet.y < 0 || bullet.y > canvasHeight - squaresize) {
+		bullet = null;
+	}
+}
+
+
+
+function update() {
+	updatePositions();
+	eatFruit();
+	bullet.move();
+	redraw();
+}
+
+function redraw() {
+	ctx.clearRect(0,0,620,620);
+	fruit.draw();
+	head.draw();
+	if (bullet != null) {
+		bullet.draw();	
+	}
+}
+
+
+command[32] = function () {
+	console.log("pressed space");
+	head.shoot();
+}
