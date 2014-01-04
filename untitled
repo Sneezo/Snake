@@ -1,10 +1,66 @@
-//Bullet shooting part of the game, not yet to be implemented
+function update() {
+	updatePositions();
+	eatFruit();
+	if(bullet !=  null) {
+		bulletBorderCheck();
+	}
+	if(bullet != null) {
+		bullet.move();	
+	}
+	redraw();
+	hasMoved = false;
+}
 
-var bullet;
+function redraw() {
+	ctx.clearRect(0,0,620,620);
+	fruit.draw();
+	head.draw();
+	if (bullet != null) {
+		bullet.draw();	
+	}
+}
+
+function bulletBorderCheck() {
+	if (bullet.x < 0 || bullet.x > canvasWidth - squaresize) {
+		bullet = null;
+	} else if (bullet.y < 0 || bullet.y > canvasHeight - squaresize) {
+		bullet = null;
+	}
+}
+
+command[32] = function () {
+	console.log("pressed space");
+	head.shoot();
+}
+
+
+function togglePlay() {
+	console.log("toggling");
+	if(isPlaying){
+		stopPlaying();
+	} else {
+		startPlaying();
+	}
+}
+
+document.addEventListener('keydown',function(event) {
+	console.log('YOU PRESSED: ' + event.keyCode);
+	var f = command[event.keyCode];
+	if (typeof(f) == 'function') {
+		f();
+	}
+})
+
+
+var bullet = new Array();
 
 head.shoot = function () {
 	console.log("shooting");
-	bullet = new Bullet();
+	var i = 0;
+	while (bullet[i] != null) {
+		i++
+	};
+	bullet[i] = new Bullet();
 }
 
 function Bullet() {
@@ -16,7 +72,7 @@ function Bullet() {
 
 	this.draw = function () {
 		console.log("drawing bullet");
-		ctx.fillStyle = "#0066FF";
+		ctx.fillStyle = "#000000";
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 	}
 	this.move = function () {
@@ -30,37 +86,4 @@ function Bullet() {
 			bullet.y = bullet.y + 2*squaresize;
 		}
 	}
-}
-
-
-function bulletBorderCheck() {
-	if (bullet.x < 0 || bullet.x > canvasWidth - squaresize) {
-		bullet = null;
-	} else if (bullet.y < 0 || bullet.y > canvasHeight - squaresize) {
-		bullet = null;
-	}
-}
-
-
-
-function update() {
-	updatePositions();
-	eatFruit();
-	bullet.move();
-	redraw();
-}
-
-function redraw() {
-	ctx.clearRect(0,0,620,620);
-	fruit.draw();
-	head.draw();
-	if (bullet != null) {
-		bullet.draw();	
-	}
-}
-
-
-command[32] = function () {
-	console.log("pressed space");
-	head.shoot();
 }

@@ -4,7 +4,8 @@ var canvasHeight = 600, canvasWidth = 600; // hard coded in the html
 var ctx = c.getContext("2d");
 
 var squaresize = 20;
-var gameSpeed = 1000/10;
+var fps = 10;
+var gameSpeed = 1000/fps;
 var xTiles = canvasWidth/squaresize;
 var yTiles = canvasHeight/squaresize;
 
@@ -13,6 +14,12 @@ var dif = squaresize; // Stepsize
 
 // Game loop element
 var t;
+
+var score = 0;
+
+var shouldAddSlowFruit = false;
+var shouldAddSpeedFruit = true;
+var speedDif = 4;
 
 var isPlaying = false;
 var dead = false;
@@ -87,11 +94,68 @@ function Head() {
 var head = new Head();
 randomizePosition(head);
 
+function eatFruit() {
+	if(head.x === fruit.x && head.y === fruit.y) {
+		fruit.move(fruit);
+		head.shouldAddChild = true;
+		score++;
+	}
+	if(head.x === speedFruit.x && head.y === speedFruit.y) {
+		speedFruit.move(speedFruit);
+		head.shouldAddChild = true;
+		fps = fps+speedDif;
+		score++;
+		shouldAddSpeedFruit = false;
+	}
+	if(head.x === slowFruit.x && head.y === slowFruit.y) {
+		slowFruit.move(slowFruit);
+		head.shouldAddChild = true;
+		fps = fps-speedDif;
+		score++;
+		shouldAddSlowFruit = false;
+	}
+}
+
+fruitCheck = function() {
+	i = 0;
+	while(i != score) {
+		if(i*15 == score){
+			shouldAddSpeedFruit = true;
+		}
+		if(i*30 == score){
+			shouldAddSlowFruit = true;
+		}
+		i++;
+	}
+}
+
+slowFruit = new Object();
+slowFruit.move = randomizePosition;
+slowFruit.width = squaresize;
+slowFruit.height = squaresize;
+slowFruit.draw = function () {
+	ctx.fillStyle = "#CC00FF";
+	ctx.fillRect(slowFruit.x, slowFruit.y, slowFruit.height, slowFruit.width);
+}
+slowFruit.move(slowFruit);
+
+
+speedFruit = new Object();
+speedFruit.move = randomizePosition;
+speedFruit.width = squaresize;
+speedFruit.height = squaresize;
+speedFruit.draw = function () {
+	ctx.fillStyle = "#FFCC00";
+	ctx.fillRect(speedFruit.x, speedFruit.y, speedFruit.height, speedFruit.width);
+}
+speedFruit.move(speedFruit);
+
+
 fruit = new Object();
 fruit.move = randomizePosition;
 fruit.width = squaresize;
 fruit.height = squaresize;
-fruit.draw = function drawFruit() {
+fruit.draw = function () {
 	ctx.fillStyle = "#FF0000";
 	ctx.fillRect(fruit.x, fruit.y, fruit.height, fruit.width);
 }
@@ -144,24 +208,16 @@ function Child(parent) {
 }
 
 
-function eatFruit() {
-	if(head.x === fruit.x && head.y === fruit.y) {
-		fruit.move(fruit);
-		head.shouldAddChild = true;
-	}
-}
+
 
 function update() {
 	updatePositions();
 	eatFruit();
-	if(bullet !=  null) {
-		bulletBorderCheck();
-	}
-	if(bullet != null) {
-		bullet.move();	
-	}
+	fruitCheck();
+	bulletBorderCheck();
 	redraw();
 	hasMoved = false;
+	console.log(score);
 }
 
 function updatePositions() {
@@ -174,7 +230,6 @@ function updatePositions() {
 		head.addChild();
 		head.shouldAddChild = false;
 	}
-		// bulletBorderCheck();
 		head.update();
 
 }
@@ -183,18 +238,20 @@ function redraw() {
 	ctx.clearRect(0,0,620,620);
 	fruit.draw();
 	head.draw();
-	if (bullet != null) {
-		bullet.draw();	
+	for (var i = bullet.length - 1; i >= 0; i--) {
+		if(bullet[i] != null) {
+			bullet[i].move();
+			bullet[i].draw();
+		}
+	}
+	if(shouldAddSpeedFruit){
+		speedFruit.draw();
+	}
+	if(shouldAddSlowFruit){
+		slowFruit.draw();
 	}
 }
 
-function bulletBorderCheck() {
-	if (bullet.x < 0 || bullet.x > canvasWidth - squaresize) {
-		bullet = null;
-	} else if (bullet.y < 0 || bullet.y > canvasHeight - squaresize) {
-		bullet = null;
-	}
-}
 
 function stopPlaying() {
 	console.log("stopping play");
@@ -232,6 +289,9 @@ command[40] = function () { // Down key
 		head.dir = "down";
 		hasMoved = true;
 };
+command[70] = function () {
+	head.addChild();
+}
 command[32] = function () {
 	console.log("pressed space");
 	head.shoot();
@@ -263,11 +323,16 @@ document.addEventListener('keydown',function(event) {
 
 //Bullet shooting part of the game, not yet to be implemented
 
-var bullet;
+var bullet = new Array();
 
 head.shoot = function () {
 	console.log("shooting");
-	bullet = new Bullet();
+	var i = 0;
+	while (bullet[i] != null || bullet[i] != undefined) {
+		i++
+	}
+	bullet[i] = new Bullet();
+	console.log(bullet);
 }
 
 function Bullet() {
@@ -283,19 +348,31 @@ function Bullet() {
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 	}
 	this.move = function () {
-		if(bullet.dir=="right") {
-			bullet.x = bullet.x + 2*squaresize;
-		} else if (bullet.dir=="left") {
-			bullet.x = bullet.x - 2*squaresize;
-		} else if (bullet.dir=="up") {
-			bullet.y = bullet.y - 2*squaresize;
-		} else if (bullet.dir=="down") {
-			bullet.y = bullet.y + 2*squaresize;
+		for (var i = bullet.length - 1; i >= 0; i--) {
+			if(bullet[i] != null) {
+				if(bullet[i].dir=="right") {
+					bullet[i].x = bullet[i].x + 2*squaresize;
+				} else if (bullet[i].dir=="left") {
+					bullet[i].x = bullet[i].x - 2*squaresize;
+				} else if (bullet[i].dir=="up") {
+					bullet[i].y = bullet[i].y - 2*squaresize;
+				} else if (bullet[i].dir=="down") {
+					bullet[i].y = bullet[i].y + 2*squaresize;
+				}
+			}
 		}
 	}
 }
 
-
+function bulletBorderCheck() {
+	for (var i = bullet.length - 1; i >= 0; i--) {
+		if (bullet[i] != null && (bullet[i].x < 0 || bullet[i].x > canvasWidth - squaresize)) {
+			bullet[i] = null;
+		} else if (bullet[i] != null && (bullet[i].y < 0 || bullet[i].y > canvasHeight - squaresize)) {
+			bullet[i] = null;
+		}
+	}
+}
 
 
 
