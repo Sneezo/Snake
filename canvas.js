@@ -19,7 +19,7 @@ var score = 0;
 
 var shouldAddSlowFruit = false;
 var shouldAddSpeedFruit = true;
-var speedDif = 4;
+var speedDif = 400;
 
 var isPlaying = false;
 var dead = false;
@@ -106,6 +106,8 @@ function eatFruit() {
 		fps = fps+speedDif;
 		score++;
 		shouldAddSpeedFruit = false;
+		stopPlaying();
+		startPlaying();
 	}
 	if(head.x === slowFruit.x && head.y === slowFruit.y) {
 		slowFruit.move(slowFruit);
@@ -113,6 +115,8 @@ function eatFruit() {
 		fps = fps-speedDif;
 		score++;
 		shouldAddSlowFruit = false;
+		stopPlaying();
+		startPlaying();
 	}
 }
 
