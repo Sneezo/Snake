@@ -19,7 +19,7 @@ var score = 0;
 
 var shouldAddSlowFruit = false;
 var shouldAddSpeedFruit = true;
-var speedDif = 400;
+var speedDif = 8;
 
 var isPlaying = false;
 var dead = false;
@@ -100,24 +100,33 @@ function eatFruit() {
 		head.shouldAddChild = true;
 		score++;
 	}
-	if(head.x === speedFruit.x && head.y === speedFruit.y) {
-		speedFruit.move(speedFruit);
-		head.shouldAddChild = true;
-		fps = fps+speedDif;
-		score++;
-		shouldAddSpeedFruit = false;
-		stopPlaying();
-		startPlaying();
+	if(shouldAddSpeedFruit) {
+		if(head.x === speedFruit.x && head.y === speedFruit.y) {
+			speedFruit.move(speedFruit);
+			head.shouldAddChild = true;
+			stopPlaying();
+			fps = fps+speedDif;
+			gameSpeed = 1000/fps;
+			score++;
+			shouldAddSpeedFruit = false;
+			startSpeedPlaying();
+			//speedFruit = null;
+		}
 	}
-	if(head.x === slowFruit.x && head.y === slowFruit.y) {
-		slowFruit.move(slowFruit);
-		head.shouldAddChild = true;
-		fps = fps-speedDif;
-		score++;
-		shouldAddSlowFruit = false;
-		stopPlaying();
-		startPlaying();
+	if(shouldAddSlowFruit) {
+		if(head.x === slowFruit.x && head.y === slowFruit.y) {
+			slowFruit.move(slowFruit);
+			head.shouldAddChild = true;
+			stopPlaying();
+			fps = fps-speedDif;
+			gameSpeed = 1000/fps;
+			score++;
+			shouldAddSlowFruit = false;
+			startSlowPlaying();
+			//slowFruit = null;
+		}
 	}
+
 }
 
 fruitCheck = function() {
@@ -134,25 +143,29 @@ fruitCheck = function() {
 }
 
 slowFruit = new Object();
-slowFruit.move = randomizePosition;
-slowFruit.width = squaresize;
-slowFruit.height = squaresize;
-slowFruit.draw = function () {
-	ctx.fillStyle = "#CC00FF";
-	ctx.fillRect(slowFruit.x, slowFruit.y, slowFruit.height, slowFruit.width);
+if(slowFruit) {
+	slowFruit.move = randomizePosition;
+	slowFruit.width = squaresize;
+	slowFruit.height = squaresize;
+	slowFruit.draw = function () {
+		ctx.fillStyle = "#CC00FF";
+		ctx.fillRect(slowFruit.x, slowFruit.y, slowFruit.height, slowFruit.width);
+	}
+	slowFruit.move(slowFruit);
 }
-slowFruit.move(slowFruit);
 
 
 speedFruit = new Object();
-speedFruit.move = randomizePosition;
-speedFruit.width = squaresize;
-speedFruit.height = squaresize;
-speedFruit.draw = function () {
-	ctx.fillStyle = "#FFCC00";
-	ctx.fillRect(speedFruit.x, speedFruit.y, speedFruit.height, speedFruit.width);
+if(speedFruit) {
+	speedFruit.move = randomizePosition;
+	speedFruit.width = squaresize;
+	speedFruit.height = squaresize;
+	speedFruit.draw = function () {
+		ctx.fillStyle = "#FFCC00";
+		ctx.fillRect(speedFruit.x, speedFruit.y, speedFruit.height, speedFruit.width);
+	}
+	speedFruit.move(speedFruit);
 }
-speedFruit.move(speedFruit);
 
 
 fruit = new Object();
@@ -267,7 +280,16 @@ function startPlaying() {
 	t = setInterval("update()", gameSpeed);
 	isPlaying = true;
 }
-
+function startSlowPlaying() {
+	console.log("starting slow play");
+	t = setInterval("update()", gameSpeed);
+	isPlaying = true;
+}
+function startSpeedPlaying() {
+	console.log("starting speed play");
+	t = setInterval("update()", gameSpeed);
+	isPlaying = true;
+}
 
 // Create a new key/hash table
 var command = {};
