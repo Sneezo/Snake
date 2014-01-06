@@ -19,7 +19,7 @@ var score = 0;
 
 var shouldAddSlowFruit = false;
 var shouldAddSpeedFruit = true;
-var speedDif = 8;
+var speedDif = 4;
 
 var isPlaying = false;
 var dead = false;
@@ -177,7 +177,6 @@ fruit.draw = function () {
 	ctx.fillRect(fruit.x, fruit.y, fruit.height, fruit.width);
 }
 fruit.move(fruit);
-
 
 
 function Child(parent) {
@@ -362,7 +361,7 @@ head.shoot = function () {
 }
 
 function Bullet() {
-	this.x = head.x;
+	this.x = head.x/2;
 	this.y = head.y;
 	this.dir = head.dir;
 	this.width = squaresize/2;
@@ -377,13 +376,13 @@ function Bullet() {
 		for (var i = bullet.length - 1; i >= 0; i--) {
 			if(bullet[i] != null) {
 				if(bullet[i].dir=="right") {
-					bullet[i].x = bullet[i].x + 2*squaresize;
+					bullet[i].x = bullet[i].x + squaresize;
 				} else if (bullet[i].dir=="left") {
-					bullet[i].x = bullet[i].x - 2*squaresize;
+					bullet[i].x = bullet[i].x - squaresize;
 				} else if (bullet[i].dir=="up") {
-					bullet[i].y = bullet[i].y - 2*squaresize;
+					bullet[i].y = bullet[i].y - squaresize;
 				} else if (bullet[i].dir=="down") {
-					bullet[i].y = bullet[i].y + 2*squaresize;
+					bullet[i].y = bullet[i].y + squaresize;
 				}
 			}
 		}
